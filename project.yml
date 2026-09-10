@@ -20,6 +20,7 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
   configs:
     Release:
+      ASSETCATALOG_COMPILER_OPTIMIZATION: space
       # Strip the shipped binary (dSYM is still generated first) and drop unused code.
       DEPLOYMENT_POSTPROCESSING: YES
       STRIP_INSTALLED_PRODUCT: YES
