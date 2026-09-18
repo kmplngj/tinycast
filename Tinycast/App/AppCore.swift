@@ -61,6 +61,8 @@ final class AppCore {
     let customQuickActions = CustomQuickActionStore()
     let chatGPTSubscription = ChatGPTSubscriptionManager()
     let installedAI = InstalledAIManager()
+    @ObservationIgnored private(set) lazy var configurationCoordinator = ConfigurationCoordinator(core: self)
+    @ObservationIgnored private var startupTask: Task<Void, Never>?
 
     /// Set when a quicklink editor should open with Settings; the pane consumes it.
     var pendingQuicklinkEdit: QuicklinkEditRequest?
@@ -235,6 +237,17 @@ final class AppCore {
     }
 
     func start() {
+        startupTask = Task { [weak self] in
+            guard let self else { return }
+            self.quicklinks.load()
+            self.hotKeys.loadBindings()
+            await self.configurationCoordinator.bootstrap()
+            self.startRuntime()
+            self.configurationCoordinator.startObserving()
+        }
+    }
+
+    private func startRuntime() {
         Signposts.interval("AppCore.start") {
             // Shorten AppKit's ~2–3s tooltip delay; registration domain, so a user default wins.
             UserDefaults.standard.register(defaults: ["NSInitialToolTipDelay": 250])
@@ -278,8 +291,6 @@ final class AppCore {
             quicklinks.onChange = { [weak self] _ in
                 self?.quicklinkCoordinator.applyQuicklinksPresence()
             }
-            // Before `hotKeys.start` even when off: the prune reads it. docs/features/quicklinks.md
-            quicklinks.load()
             quicklinkCoordinator.applyQuicklinksPresence()
             appleShortcutCoordinator.applyPresence()
             paletteCoordinator.onLauncherShown = { [weak self] in
@@ -287,7 +298,10 @@ final class AppCore {
             }
             updateCoordinator.applyEnabled()
             calendarCoordinator.applyEnabled()
-            Task { await appIndex.refresh() }
+            Task {
+                await appIndex.refresh()
+                if configurationCoordinator.folder != nil { hotKeys.refreshRegistrations() }
+            }
             Task { await emojiIndex.load() }
             currencyRates.start()
             updateChecker.onUpdateAvailable = { [weak self] release in
@@ -339,6 +353,17 @@ final class AppCore {
                 // A disabled feature drops its commands from the launcher; their shortcuts go too.
                 guard case .command(let id) = action else { return true }
                 return appIndex.isCommandEnabled(id)
+            }
+            hotKeys.canRegister = { [weak self] action in
+                guard self?.configurationCoordinator.folder != nil else { return true }
+                switch action {
+                case .app(let id):
+                    return NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) != nil
+                case .settingsPane(let id):
+                    return self?.appIndex.apps.contains { $0.kind == .systemSettings && $0.bundleID == id }
+                        ?? false
+                default: return true
+                }
             }
             KeyShortcut.displayedHyperChord = { [settings] in
                 guard settings.hyperKey != .none else { return nil }
@@ -436,6 +461,8 @@ final class AppCore {
     }
 
     func flushNotesForTermination() async {
+        await startupTask?.value
+        await configurationCoordinator.flush()
         await notesCoordinator.prepareForTermination()
     }
 
@@ -466,6 +493,8 @@ final class AppCore {
     }
 
     func prepareForTermination() {
+        startupTask?.cancel()
+        configurationCoordinator.stop()
         clipboardTextIndexer?.stop()
         // Caps Lock first: its remap is the one teardown that outlives the process.
         hyperKeyTap.prepareForTermination()

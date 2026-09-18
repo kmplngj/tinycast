@@ -244,3 +244,12 @@ Applications, System Settings, System Actions, Commands — are thin wrappers ov
 `SettingsTab` and `SettingsSection` both identify by the case itself, never by an index. A selectable
 `List` flattens section and row IDs into one namespace, so overlapping `Int` IDs make SwiftUI drop
 whole sidebar groups; `Tests/settings-history-test.swift` pins the two namespaces apart.
+
+## Portable configuration folder
+
+`AppCore.configurationCoordinator` owns the opt-in folder lifecycle. Startup awaits its initial
+read and runtime projection before registering shortcuts and starting services. It observes the
+explicit portable adapter, serializes disk access, retains a local journal and reconciles against
+the accepted base. `ConfigurationRuntimeAdapter` projects only reviewed portable fields through
+existing stores and coordinators; local-only state keeps its current owners. The pure schema and
+merge rules live under `Features/Configuration/Model/`. See [configuration.md](features/configuration.md).

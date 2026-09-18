@@ -20,6 +20,22 @@ final class HotKeyManager {
     var displayName: ((HotKeyAction) -> String?)?
     /// Whether the action's launcher category is switched on. Set in `AppCore.start()`.
     var allowsAction: ((HotKeyAction) -> Bool)?
+    @ObservationIgnored var canRegister: ((HotKeyAction) -> Bool)?
+
+    var allBindings: [HotKeyAction: HotKeyBinding] { bindings }
+
+    func loadBindings() {
+        for action in candidateActions { bindings[action] = storedBinding(for: action) }
+    }
+
+    func refreshRegistrations() {
+        guard isStarted else { return }
+        for action in candidateActions {
+            center.unregister(id: action.defaultsKey)
+            register(action)
+        }
+        syncDoubleTaps()
+    }
 
     /// The recorder currently capturing, which also pauses both engines.
     var recordingAction: HotKeyAction? {
@@ -41,6 +57,7 @@ final class HotKeyManager {
     let capture = ShortcutCaptureSession()
 
     private let center = HotKeyCenter()
+    private var isStarted = false
     private var doubleTaps: [DoubleTapModifier: HotKeyAction] = [:]
     /// Every binding, loaded once in `start()` and written through on change.
     private var bindings: [HotKeyAction: HotKeyBinding] = [:]
@@ -62,6 +79,7 @@ final class HotKeyManager {
         customCommandIDs: Set<UUID>, quicklinkIDs: Set<UUID>, windowLayoutIDs: Set<UUID>,
         customWindowSizeIDs: Set<UUID>, quickActionIDs: Set<UUID>
     ) {
+        isStarted = true
         prune(key: boundCustomCommandKey, live: customCommandIDs) { .customCommand(id: $0) }
         prune(key: boundQuicklinkKey, live: quicklinkIDs) { .quicklink(id: $0) }
         prune(key: boundWindowLayoutKey, live: windowLayoutIDs) { .windowLayout(id: $0) }
@@ -249,6 +267,8 @@ final class HotKeyManager {
 
     /// Hands a combo to Carbon; a double-tap has no per-action registration to make.
     private func register(_ action: HotKeyAction) {
+        guard isStarted else { return }
+        guard canRegister?(action) ?? true else { return }
         guard let shortcut = binding(for: action)?.shortcut else { return }
         center.register(id: action.defaultsKey, shortcut: shortcut) { [weak self] in
             self?.perform(action)
@@ -257,8 +277,10 @@ final class HotKeyManager {
 
     /// Rebuilt wholesale, so the map can't drift from what is on disk.
     private func syncDoubleTaps() {
+        guard isStarted else { return }
         doubleTaps = [:]
         for action in candidateActions {
+            guard canRegister?(action) ?? true else { continue }
             guard let modifier = binding(for: action)?.doubleTapModifier else { continue }
             doubleTaps[modifier] = action
         }

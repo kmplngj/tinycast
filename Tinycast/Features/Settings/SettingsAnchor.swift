@@ -100,6 +100,7 @@ extension SettingsAnchor {
     static let permissionsCalendars = Self(tab: .permissions, title: "Calendars")
 
     static let backupExport = Self(tab: .backup, title: "Export")
+    static let configurationLocation = Self(tab: .backup, title: "Configuration location")
     static let backupImport = Self(tab: .backup, title: "Import")
     static let backupImportFromRaycast = Self(tab: .backup, title: "Import from Raycast")
 

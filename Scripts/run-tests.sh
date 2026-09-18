@@ -113,6 +113,12 @@ run() {
     printf '%s %s %s %s\n' "$pri" "$name" "$opt" "$*" >> "$QUEUE"
 }
 
+C=Tinycast/Features/Configuration
+run configuration-test Tinycast/Features/Settings/AppSettingsKey.swift $C/Model/*.swift \
+                       $C/Service/ConfigurationRepository.swift
+run configuration-filesystem-test Tinycast/Features/Settings/AppSettingsKey.swift $C/Model/*.swift \
+                                  $C/Service/ConfigurationRepository.swift $C/Service/ConfigurationFolderMonitor.swift
+
 L=Tinycast/Features/Launcher/Model
 run slow -O fuzz-test      $L/SearchRelevance.swift $L/ScriptRomanization.swift \
                            $L/EntryNaming.swift $L/LauncherOrder.swift

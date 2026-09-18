@@ -262,6 +262,14 @@ final class QuicklinkCoordinator {
         return count
     }
 
+    func replaceConfigurationQuicklinks(_ incoming: [Quicklink]) throws {
+        let previous = store.quicklinks
+        try store.replaceConfiguration(with: incoming)
+        let liveIDs = Set(incoming.map(\.id))
+        let removed = previous.filter { !liveIDs.contains($0.id) }
+        removeQuicklinkReferences(ids: Set(removed.map(\.id)), entryIDs: Set(removed.map(\.entryID)))
+    }
+
     private func removeQuicklinkReferences(ids: Set<UUID>, entryIDs: Set<String>) {
         for id in ids {
             let action = HotKeyAction.quicklink(id: id)

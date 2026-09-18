@@ -92,6 +92,11 @@ struct WindowLayoutPlan: Equatable, Sendable {
         for screen in screens where screensByUUID[screen.display.uuid.lowercased()] == nil {
             screensByUUID[screen.display.uuid.lowercased()] = screen
         }
+        let primary = screens.first { $0.screen.frame.origin == .zero } ?? screens.first
+        let roleScreens = [primary].compactMap { $0 } + screens.filter { $0.screen.id != primary?.screen.id }
+        for (index, role) in ["primary", "secondary", "tertiary"].enumerated() where index < roleScreens.count {
+            screensByUUID["role:" + role] = roleScreens[index]
+        }
         var available = Dictionary(grouping: sorted(windows), by: \.bundleID)
         var launched: Set<String> = []
         var placements: [Placement] = []

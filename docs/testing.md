@@ -75,6 +75,15 @@ failing command in a non-final AND-OR list member, so `swiftc … && /tmp/x` swa
 the script sails on. CI reported success over a harness that had not compiled for twenty-five phases
 because of exactly this; `run-tests.sh` keeps the two steps separate and records both kinds of failure.
 
+### Configuration integration fixture
+
+After a Debug build, run `Scripts/run-configuration-runtime-test.sh <Debug-products-directory>`.
+It links the built app module into a fresh UUID-scoped application and exercises the real settings
+coordinator, collections, journal, executable review and conflict actions. It does not start global
+shortcuts, clipboard capture or optional services. `--preview` leaves its Backup pane open for
+Computer Use testing. This build-dependent fixture supplements the two standalone configuration
+harnesses; see [the configuration validation record](validation/configuration/README.md).
+
 ### What to run when
 
 If a change touches anything in the right column, the harness on the left is mandatory.

@@ -1,0 +1,27 @@
+{
+  "customCommandOrder": [],
+  "customCommands": {},
+  "favoriteApps": [
+    "com.apple.Safari"
+  ],
+  "hotkeys": {
+    "togglePalette": {
+      "keyCode": 49,
+      "modifiers": 2048
+    }
+  },
+  "pinnedQuicklinks": [
+    "00000000-0000-0000-0000-000000000001"
+  ],
+  "quicklinks": {
+    "00000000-0000-0000-0000-000000000001": {
+      "link": "https://github.com/abue-ammar/tinycast",
+      "name": "Tinycast"
+    }
+  },
+  "schemaVersion": 1,
+  "settings": {
+    "appearance": "system",
+    "compactMode": true
+  }
+}

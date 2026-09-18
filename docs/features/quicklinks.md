@@ -249,3 +249,10 @@ one turns the feature on — the switch grants no permission class.
 ```sh
 ./Scripts/run-tests.sh quicklink-test
 ```
+
+## Configuration folder projection
+
+Folder sync replaces quicklinks in one SQLite transaction before projecting other portable state.
+Failed writes roll back and retain the prior in-memory library; callbacks publish after commit.
+Portable pins use an ordered ID array, while creation dates remain local. See
+[configuration.md](configuration.md) for the independent schema and reconciliation contract.

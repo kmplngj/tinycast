@@ -171,7 +171,7 @@ enum BackupActions {
                 quicklinksError = QuicklinkError.storageUnavailable.errorDescription
             }
         }
-        let summary = result.backup.apply(to: core)
+        let summary = core.configurationCoordinator.performLocalEdit { result.backup.apply(to: core) }
         let imported =
             result.clipboard.isEmpty
             ? 0 : core.clipboardStore.importEntries(result.clipboard)

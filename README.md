@@ -1,4 +1,55 @@
-# Tinycast
+# Tinycast — kmplngj’s fork
+
+Personal fork of [abue-ammar/tinycast](https://github.com/abue-ammar/tinycast).
+The only fork-specific feature is portable JSON settings export and folder sync.
+Build this fork from source using [the development guide](docs/development.md);
+upstream downloads do not include this feature.
+
+## Fork feature: JSON configuration for sync
+
+Choose **Settings → Backup → Configuration location** to enable a portable `settings.json`:
+
+| Location | Behavior |
+| --- | --- |
+| **This Mac — current storage** | Default native storage; folder sync is off. |
+| **Dotfiles folder** | `~/.config/tinycast/settings.json`, using an absolute `XDG_CONFIG_HOME` when available. Dev and beta use distinct preset folders. |
+| **Custom folder…** | Choose a directory in a config repository or a folder managed by your sync service. |
+
+Portable UI changes save automatically. Valid external edits reload while Tinycast is running,
+including changes pulled with yadm or Git. Tinycast handles the local file; your existing tool handles
+commits, pushes, pulls and transport between Macs.
+
+The uncompressed folder follows the `.tinycast` backup’s `settings.json` naming and uses matching
+fields such as `customCommands`, `hotkeys`, `windowLayouts` and `launcherAliases`. Its versioned sync
+contract adds stable IDs, deterministic formatting and explicit deletion rules;
+[the mapping documents each difference](docs/features/configuration.md#relationship-to-a-tinycast-backup).
+
+Portable settings include appearance and launcher preferences, favorites, hidden items, aliases,
+shortcuts, custom commands, quicklinks and window layout definitions. JSON uses stable IDs and
+predictable formatting for readable diffs. Incoming shell commands and their bindings require local
+review; conflicting edits pause shared writes and retain local recovery copies.
+
+**Getting started:** choose a folder, review its resolved path, then use the existing folder settings
+or explicitly initialize it from this Mac. Track `settings.json` in your config repository and select
+the corresponding local folder once on each Mac. The Debug build uses `tinycast-dev` for its dotfiles
+preset. Returning to **This Mac** keeps the applied values and leaves the shared file intact.
+
+The existing **`.tinycast` backup format remains available**, including associated files such as
+clipboard images when selected for export. Automatic JSON configuration sync covers portable
+settings only. Clipboard/chat history, notes, snippets, credentials, AI/MCP configuration, extension
+data, permissions and machine-specific paths remain local. Those categories are never written to
+the selected folder; exclusion does not depend on `.gitignore` or the sync provider. Optional data
+sync is not implemented. Review manually authored command text
+and URLs before sharing them; they can contain private information.
+
+See the [setup guide, exact portable coverage and yadm walkthrough](docs/features/configuration.md),
+[example settings.json](docs/examples/settings.json), and
+[validation report with UI evidence](docs/validation/configuration/README.md).
+Local build, automated and UI checks are recorded there. Two-Mac/provider testing and the full
+memory/leak validation remain outstanding; simultaneous edits are not guaranteed to merge without
+conflicts.
+
+
 
 **A tiny, fully native macOS launcher. One hotkey, everything you reach for all day, under 100 MB of
 RAM.**

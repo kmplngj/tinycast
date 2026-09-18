@@ -38,6 +38,7 @@ struct BackupSettingsView: View {
 
     var body: some View {
         Form {
+            ConfigurationSettingsSection()
             Section {
                 LabeledContent {
                     if exporting {

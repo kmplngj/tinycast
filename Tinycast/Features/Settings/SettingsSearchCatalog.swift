@@ -560,6 +560,8 @@ enum SettingsSearchCatalog {
     ]
 
     private static let backup: [SettingsSearchEntry] = [
+        .init(.configurationLocation, "Configuration location",
+              keywords: ["sync", "settings.json", "yadm", "dotfiles", "folder", "XDG", "reload", "conflict", "This Mac"]),
         .init(
             pane: .backup,
             keywords: ["export", "import", "restore", "migrate", "raycast"]),

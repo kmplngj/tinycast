@@ -21,7 +21,7 @@ enum BackupApplier {
         if categories.contains(.configuration), let data = try? Data(contentsOf: bundle.settingsURL),
             let backup = try? SettingsBackup(json: data)
         {
-            summary.settings = backup.apply(to: core)
+            summary.settings = core.configurationCoordinator.performLocalEdit { backup.apply(to: core) }
         }
         if categories.contains(.clipboard) {
             summary.clipboard = await importClipboard(bundle, into: core.clipboardStore)

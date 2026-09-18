@@ -3,6 +3,11 @@
 Export and import of Tinycast's own data as a single `.tinycast` file, plus the entry point for
 importing a Raycast export. The feature lives in `Features/Backup/`.
 
+The pane also hosts [Configuration location](configuration.md), an opt-in automatic portable
+settings file owned by `Features/Configuration/`. Its versioned schema and complete replacement
+semantics are independent of the `.tinycast` archive. Imports into folder mode enter the sync
+coordinator as local edits.
+
 A backup carries five independently selectable categories, ticked on export and again on import:
 **Settings & Shortcuts**, **Clipboard History**, **Snippets**, **Notes** and **Launcher Learning**.
 
@@ -142,3 +147,8 @@ what keeps a second pass from silently failing its inserts. Same reasoning as `Q
 The old flat `Tinycast-Settings-*.json` export is gone rather than deprecated, and nothing reads it.
 
 Raycast import is documented separately in [raycast-import.md](raycast-import.md).
+
+The folder-sync document uses the archive’s top-level settings names with a separate strict contract.
+See [the field mapping and data boundary](configuration.md#relationship-to-a-tinycast-backup).
+An extracted backup remains a snapshot; importing its original `.tinycast` archive and initializing
+an empty sync folder is the supported conversion path.

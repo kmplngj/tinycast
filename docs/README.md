@@ -54,3 +54,6 @@ open with an `## Invariants` section; read it before changing anything in that a
 
 [`CONTRIBUTING.md`](../CONTRIBUTING.md) covers the workflow — what to open, what to test, what a PR needs.
 [`SECURITY.md`](../SECURITY.md) covers vulnerability reports.
+
+- [Automatic configuration folder](features/configuration.md): setup, version 1 file reference,
+  portable coverage, yadm workflow, conflicts and recovery.

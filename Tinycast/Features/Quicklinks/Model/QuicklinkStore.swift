@@ -150,6 +150,31 @@ final class QuicklinkStore {
         return append(Self.sanitized(incoming)).count
     }
 
+    func replaceConfiguration(with incoming: [Quicklink]) throws {
+        guard isAvailable, sqlite3_exec(db, "BEGIN IMMEDIATE", nil, nil, nil) == SQLITE_OK else {
+            throw QuicklinkError.storageUnavailable
+        }
+        let previous = quicklinks
+        let callback = onChange
+        onChange = nil
+        defer { onChange = callback }
+        do {
+            guard sqlite3_exec(db, "DELETE FROM quicklinks", nil, nil, nil) == SQLITE_OK else {
+                throw QuicklinkError.storageUnavailable
+            }
+            quicklinks = []
+            for value in incoming { try write(value) }
+            guard sqlite3_exec(db, "COMMIT", nil, nil, nil) == SQLITE_OK else {
+                throw QuicklinkError.storageUnavailable
+            }
+        } catch {
+            sqlite3_exec(db, "ROLLBACK", nil, nil, nil)
+            quicklinks = previous
+            throw error
+        }
+        callback?(quicklinks)
+    }
+
     private func write(_ value: Quicklink) throws(QuicklinkError) {
         guard let stmt = upsertStmt else { throw .storageUnavailable }
         sqlite3_bind_text(stmt, 1, value.id.uuidString, -1, SQLITE_TRANSIENT)
